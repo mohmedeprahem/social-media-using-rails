@@ -1,0 +1,344 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+servers:
+- url: http://{defaultHost}
+  variables:
+    defaultHost:
+      default: 0.0.0.0:3000
+      enum:
+      - 127.0.0.1:3000
+      - 0.0.0.0:3000
+      - localhost:3000
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Enter the JWT token in the format: Bearer <token>'
+security:
+- bearer_auth: []
+paths:
+  "/api/v1/auth/signup":
+    post:
+      summary: Creates a user
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '201':
+          description: user created
+        '422':
+          description: invalid request
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                  example: mohamed
+                email:
+                  type: string
+                  nullable: false
+                  example: mohamed@example.com
+                password:
+                  type: string
+                  nullable: false
+                  example: password
+                image:
+                  type: file
+                  nullable: true
+              required:
+              - name
+              - email
+              - password
+  "/api/v1/auth/login":
+    post:
+      summary: Logs in a user
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '200':
+          description: user logged in
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  nullable: false
+                  example: mohamed@example.com
+                password:
+                  type: string
+                  nullable: false
+                  example: password
+              required:
+              - email
+              - password
+  "/api/v1/posts/{post_id}/comments":
+    get:
+      summary: Lists all comments
+      tags:
+      - Comments
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: post_id
+        in: path
+        description: post id
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: page number
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        description: number of comments per page
+        schema:
+          type: string
+      responses:
+        '200':
+          description: comments fetched
+    post:
+      summary: Creates a comment
+      tags:
+      - Comments
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: post_id
+        in: path
+        description: post id
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: comment created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  nullable: false
+                  example: body
+  "/api/v1/posts/{post_id}/comments/{id}":
+    patch:
+      summary: Updates a comment
+      tags:
+      - Comments
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: post_id
+        in: path
+        description: post id
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: Comment ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: comment updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  nullable: false
+                  example: body
+    delete:
+      summary: Deletes a comment
+      tags:
+      - Comments
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: post_id
+        in: path
+        description: post id
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: Comment ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: comment deleted
+  "/api/v1/posts":
+    post:
+      summary: Creates a post
+      tags:
+      - Posts
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: post created
+        '400':
+          description: invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  nullable: false
+                  example: title
+                body:
+                  type: string
+                  nullable: false
+                  example: body
+                tag_ids:
+                  type: array
+                  items:
+                    type: integer
+                  example:
+                  - 1
+                  - 2
+              required:
+              - title
+              - body
+              - tag_ids
+    get:
+      summary: Lists all posts
+      tags:
+      - Posts
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: page
+        in: query
+        description: page number
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        description: number of posts per page
+        schema:
+          type: string
+      responses:
+        '200':
+          description: posts fetched
+  "/api/v1/posts/{id}":
+    get:
+      summary: Shows a post
+      tags:
+      - Posts
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        description: post id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: post fetched
+    patch:
+      summary: Update a post
+      tags:
+      - Posts
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        description: Post ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: post updated
+        '401':
+          description: unauthorized
+        '404':
+          description: post not found
+        '422':
+          description: invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  nullable: false
+                  example: Updated Title
+                body:
+                  type: string
+                  nullable: false
+                  example: Updated content
+                tag_ids:
+                  type: array
+                  items:
+                    type: integer
+                  example:
+                  - 1
+                  - 2
+                  nullable: true
+              required:
+              - title
+              - body
+    delete:
+      summary: Deletes a post
+      tags:
+      - Posts
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        description: Post ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: post deleted
+  "/api/v1/tags":
+    get:
+      summary: Lists all tags
+      tags:
+      - Tags
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: tags fetched
